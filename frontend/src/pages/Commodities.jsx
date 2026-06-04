@@ -54,21 +54,23 @@ export default function Commodities() {
     <div>
       <StatusBar title="상품 가격" lastUpdated={lastUpdated} jobName="commodities" onRefresh={load} />
 
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {SYMBOLS.map(s => (
-          <button
-            key={s.symbol}
-            onClick={() => setCommoditySymbol(s.symbol)}
-            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-              commoditySymbol === s.symbol
-                ? 'bg-brand-600 border-brand-600 text-white'
-                : 'border-gray-700 text-gray-400 hover:border-gray-500'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-        <div className="ml-auto flex gap-1">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="flex gap-2 flex-wrap">
+          {SYMBOLS.map(s => (
+            <button
+              key={s.symbol}
+              onClick={() => setCommoditySymbol(s.symbol)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                commoditySymbol === s.symbol
+                  ? 'bg-brand-600 border-brand-600 text-white'
+                  : 'border-gray-700 text-gray-400 hover:border-gray-500'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1 sm:ml-auto">
           {DAYS_OPTIONS.map(({ label, value }) => (
             <button
               key={value}
@@ -111,8 +113,8 @@ export default function Commodities() {
             <tr className="text-gray-500 text-xs border-b border-gray-800">
               <th className="text-left pb-2">상품</th>
               <th className="text-right pb-2">가격</th>
-              <th className="text-right pb-2">단위</th>
-              <th className="text-right pb-2">수집 시각</th>
+              <th className="hidden sm:table-cell text-right pb-2">단위</th>
+              <th className="hidden sm:table-cell text-right pb-2">수집 시각</th>
             </tr>
           </thead>
           <tbody>
@@ -124,8 +126,8 @@ export default function Commodities() {
                   <td className="py-2 text-right font-mono" style={{ color: m?.color || '#f59e0b' }}>
                     {r.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className="py-2 text-right text-gray-500 text-xs">{m?.unit || 'USD'}</td>
-                  <td className="py-2 text-right text-gray-500 text-xs">
+                  <td className="hidden sm:table-cell py-2 text-right text-gray-500 text-xs">{m?.unit || 'USD'}</td>
+                  <td className="hidden sm:table-cell py-2 text-right text-gray-500 text-xs">
                     {new Date(r.collected_at + 'Z').toLocaleString('ko-KR')}
                   </td>
                 </tr>

@@ -18,19 +18,19 @@ export default function StatusBar({ title, lastUpdated, jobName, onRefresh }) {
   }
 
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-start sm:items-center justify-between mb-6 gap-2">
       <h2 className="text-xl font-bold text-gray-100">{title}</h2>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-3">
         {lastUpdated && (
-          <span className="text-xs text-gray-500">
-            업데이트: {new Date(lastUpdated + 'Z').toLocaleString('ko-KR')}
+          <span className="text-[10px] sm:text-xs text-gray-500">
+            {new Date(lastUpdated + 'Z').toLocaleString('ko-KR')}
           </span>
         )}
         {jobName && (
           <button
             onClick={handleRefresh}
             disabled={loading}
-            className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap"
           >
             {loading ? '수집 중…' : '지금 수집'}
           </button>

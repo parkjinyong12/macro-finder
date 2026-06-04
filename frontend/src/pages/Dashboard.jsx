@@ -70,7 +70,7 @@ export default function Dashboard() {
     <div>
       <h2 className="text-xl font-bold text-gray-100 mb-6">대시보드</h2>
 
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <SummaryCard
           title="국고채 3년 금리"
           value={bond10Y?.rate?.toFixed(2)}

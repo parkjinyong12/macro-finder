@@ -146,21 +146,23 @@ export default function MacroIndicators() {
     <div>
       <StatusBar title="주요 지표" lastUpdated={lastUpdated} jobName="macro" onRefresh={load} />
 
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {SYMBOLS.map(s => (
-          <button
-            key={s.symbol}
-            onClick={() => setMacroSymbol(s.symbol)}
-            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-              macroSymbol === s.symbol
-                ? 'bg-brand-600 border-brand-600 text-white'
-                : 'border-gray-700 text-gray-400 hover:border-gray-500'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-        <div className="ml-auto flex gap-1">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="flex gap-2 flex-wrap">
+          {SYMBOLS.map(s => (
+            <button
+              key={s.symbol}
+              onClick={() => setMacroSymbol(s.symbol)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                macroSymbol === s.symbol
+                  ? 'bg-brand-600 border-brand-600 text-white'
+                  : 'border-gray-700 text-gray-400 hover:border-gray-500'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1 sm:ml-auto">
           {DAYS_OPTIONS.map(({ label, value }) => (
             <button
               key={value}
@@ -179,7 +181,7 @@ export default function MacroIndicators() {
       {isRateCompare ? (
         <>
           {/* 현재값 카드 */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             {[
               { label: '미국 기준금리', val: latestFed?.value, color: '#8b5cf6', date: latestFed?.collected_at },
               { label: '한국 기준금리', val: latestKr?.value,  color: '#ec4899', date: latestKr?.collected_at },
@@ -232,7 +234,7 @@ export default function MacroIndicators() {
           </div>
 
           {/* 결정 이력 테이블 */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               { symbol: 'FEDRATE', label: '미국 기준금리 결정 이력', color: '#8b5cf6' },
               { symbol: 'KRRATE',  label: '한국 기준금리 결정 이력', color: '#ec4899' },
@@ -301,8 +303,8 @@ export default function MacroIndicators() {
                 <tr className="text-gray-500 text-xs border-b border-gray-800">
                   <th className="text-left pb-2">지표</th>
                   <th className="text-right pb-2">값</th>
-                  <th className="text-right pb-2">단위</th>
-                  <th className="text-right pb-2">수집 시각</th>
+                  <th className="hidden sm:table-cell text-right pb-2">단위</th>
+                  <th className="hidden sm:table-cell text-right pb-2">수집 시각</th>
                 </tr>
               </thead>
               <tbody>
@@ -317,8 +319,8 @@ export default function MacroIndicators() {
                       <td className="py-2 text-right font-mono" style={{ color: m?.color || '#6b7280' }}>
                         {r.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
-                      <td className="py-2 text-right text-gray-500 text-xs">{m?.unit || ''}</td>
-                      <td className="py-2 text-right text-gray-500 text-xs">
+                      <td className="hidden sm:table-cell py-2 text-right text-gray-500 text-xs">{m?.unit || ''}</td>
+                      <td className="hidden sm:table-cell py-2 text-right text-gray-500 text-xs">
                         {new Date(r.collected_at + 'Z').toLocaleString('ko-KR')}
                       </td>
                     </tr>
@@ -361,7 +363,7 @@ function YieldCurveView({ data, latest, macroDays }) {
     <>
       {/* 현재값 카드 */}
       {latest && (
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           {[
             {
               label: '미국 10Y-2Y',
@@ -398,7 +400,7 @@ function YieldCurveView({ data, latest, macroDays }) {
       </div>
 
       {/* 미국/한국 개별 금리 추이 */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {[
           { title: '미국 국채 수익률',  lines: usDetailLines },
           { title: '한국 국채 수익률',  lines: krDetailLines },

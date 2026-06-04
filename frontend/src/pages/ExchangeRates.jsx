@@ -51,21 +51,23 @@ export default function ExchangeRates() {
     <div>
       <StatusBar title="환율" lastUpdated={lastUpdated} jobName="exchange" onRefresh={load} />
 
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {CURRENCIES.map(c => (
-          <button
-            key={c}
-            onClick={() => setExchangeCurrency(c)}
-            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-              exchangeCurrency === c
-                ? 'bg-brand-600 border-brand-600 text-white'
-                : 'border-gray-700 text-gray-400 hover:border-gray-500'
-            }`}
-          >
-            {LABELS[c]}
-          </button>
-        ))}
-        <div className="ml-auto flex gap-1">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="flex gap-2 flex-wrap">
+          {CURRENCIES.map(c => (
+            <button
+              key={c}
+              onClick={() => setExchangeCurrency(c)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                exchangeCurrency === c
+                  ? 'bg-brand-600 border-brand-600 text-white'
+                  : 'border-gray-700 text-gray-400 hover:border-gray-500'
+              }`}
+            >
+              {LABELS[c]}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1 sm:ml-auto">
           {DAYS_OPTIONS.map(({ label, value }) => (
             <button
               key={value}
@@ -108,7 +110,7 @@ export default function ExchangeRates() {
             <tr className="text-gray-500 text-xs border-b border-gray-800">
               <th className="text-left pb-2">통화</th>
               <th className="text-right pb-2">환율 (원)</th>
-              <th className="text-right pb-2">수집 시각</th>
+              <th className="hidden sm:table-cell text-right pb-2">수집 시각</th>
             </tr>
           </thead>
           <tbody>
@@ -118,7 +120,7 @@ export default function ExchangeRates() {
                 <td className="py-2 text-right font-mono text-emerald-400">
                   {r.rate.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
-                <td className="py-2 text-right text-gray-500 text-xs">
+                <td className="hidden sm:table-cell py-2 text-right text-gray-500 text-xs">
                   {new Date(r.collected_at + 'Z').toLocaleString('ko-KR')}
                 </td>
               </tr>

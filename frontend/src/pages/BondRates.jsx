@@ -55,21 +55,23 @@ export default function BondRates() {
     <div>
       <StatusBar title="국채 금리" lastUpdated={lastUpdated} jobName="bonds" onRefresh={load} />
 
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {TENORS.map(t => (
-          <button
-            key={t}
-            onClick={() => toggleTenor(t)}
-            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-              bondTenors.includes(t)
-                ? 'bg-brand-600 border-brand-600 text-white'
-                : 'border-gray-700 text-gray-400 hover:border-gray-500'
-            }`}
-          >
-            {t}
-          </button>
-        ))}
-        <div className="ml-auto flex gap-1">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="flex gap-2 flex-wrap">
+          {TENORS.map(t => (
+            <button
+              key={t}
+              onClick={() => toggleTenor(t)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                bondTenors.includes(t)
+                  ? 'bg-brand-600 border-brand-600 text-white'
+                  : 'border-gray-700 text-gray-400 hover:border-gray-500'
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1 sm:ml-auto">
           {DAYS_OPTIONS.map(({ label, value }) => (
             <button
               key={value}
@@ -102,7 +104,7 @@ export default function BondRates() {
               <tr className="text-gray-500 text-xs border-b border-gray-800">
                 <th className="text-left pb-2 font-medium">만기</th>
                 <th className="text-right pb-2 font-medium">금리 (%)</th>
-                <th className="text-right pb-2 font-medium">수집 시각</th>
+                <th className="hidden sm:table-cell text-right pb-2 font-medium">수집 시각</th>
               </tr>
             </thead>
             <tbody>
@@ -110,7 +112,7 @@ export default function BondRates() {
                 <tr key={r.tenor} className="border-b border-gray-800/50 last:border-0">
                   <td className="py-2 text-gray-300">{r.tenor}</td>
                   <td className="py-2 text-right font-mono text-brand-400">{r.rate.toFixed(3)}</td>
-                  <td className="py-2 text-right text-gray-500 text-xs">
+                  <td className="hidden sm:table-cell py-2 text-right text-gray-500 text-xs">
                     {new Date(r.collected_at + 'Z').toLocaleString('ko-KR')}
                   </td>
                 </tr>
