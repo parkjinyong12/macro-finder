@@ -1,0 +1,10 @@
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.env
+backend/macro_finder.db
+frontend/node_modules
+frontend/dist
+.git
+.github
+.claude
