@@ -1,4 +1,4 @@
-app = 'macro-finder'
+app = 'macro-finder-korea'
 primary_region = 'nrt'
 
 [build]
