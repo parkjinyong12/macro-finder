@@ -84,15 +84,16 @@ def start_scheduler():
     scheduler.add_job(job_commodities, IntervalTrigger(minutes=30), id="commodities", replace_existing=True)
     scheduler.add_job(job_news, IntervalTrigger(hours=6), id="news", replace_existing=True)
     scheduler.add_job(job_macro, IntervalTrigger(minutes=30), id="macro", replace_existing=True)
+    scheduler.add_job(job_history, IntervalTrigger(hours=24), id="history", replace_existing=True)
     scheduler.add_job(job_predictions, IntervalTrigger(hours=6), id="predictions", replace_existing=True)
     scheduler.start()
     logger.info("Scheduler started")
 
     # 최초 실행을 백그라운드 스레드로 실행해 서버 시작을 블로킹하지 않음
     import threading
-    fast_jobs = ["bonds", "exchange", "commodities", "news", "macro"]
+    initial_jobs = ["bonds", "exchange", "commodities", "news", "macro", "history"]
     def _initial_runs():
-        for name in fast_jobs:
+        for name in initial_jobs:
             try:
                 JOB_MAP[name]()
             except Exception as e:
