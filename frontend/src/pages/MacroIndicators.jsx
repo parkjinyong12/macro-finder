@@ -5,8 +5,12 @@ import {
 } from 'recharts'
 import { fetchMacro, fetchMacroLatest, fetchYieldCurve, fetchYieldCurveLatest } from '../api/client'
 import LineChart from '../components/charts/LineChart'
+import CandlestickChart from '../components/charts/CandlestickChart'
 import StatusBar from '../components/StatusBar'
 import { useFilters } from '../context/FilterContext'
+
+// OHLC 데이터가 있는 지표
+const OHLC_SYMBOLS = new Set(['KOSPI', 'SPX', 'NASDAQ', 'US10Y', 'DXY', 'USDJPY', 'VIX', 'US2Y', 'US5Y', 'KR10Y', 'KR3Y', 'KR2Y'])
 
 const SYMBOLS = [
   { symbol: 'KOSPI',        label: '코스피',        unit: 'pt',  color: '#3b82f6' },
@@ -83,6 +87,8 @@ export default function MacroIndicators() {
 
   const isRateCompare = macroSymbol === 'RATE_COMPARE'
   const isYieldCurve  = macroSymbol === 'YIELD_CURVE'
+  const [chartType, setChartType] = useState('line') // 'line' | 'candle'
+  const canShowCandle = OHLC_SYMBOLS.has(macroSymbol)
 
   const [ycData, setYcData] = useState([])
   const [ycLatest, setYcLatest] = useState(null)
@@ -137,10 +143,14 @@ export default function MacroIndicators() {
     const date = r.collected_at.slice(0, 10)
     if (!byDate[date]) byDate[date] = { date }
     byDate[date].value = r.value
+    byDate[date].open  = r.open
+    byDate[date].high  = r.high
+    byDate[date].low   = r.low
   }
   const chartData = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date))
   const chartLines = [{ key: 'value', label: meta?.label, color: meta?.color }]
   const latestVal = latest.find(l => l.symbol === macroSymbol)
+  const hasOhlc = canShowCandle && chartData.some(d => d.high != null)
 
   return (
     <div>
@@ -289,8 +299,25 @@ export default function MacroIndicators() {
           )}
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-4">
+            {hasOhlc && (
+              <div className="flex justify-end mb-3 gap-1">
+                {['line', 'candle'].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setChartType(t)}
+                    className={`px-3 py-1 rounded text-xs transition-colors ${
+                      chartType === t ? 'bg-gray-700 text-white' : 'text-gray-500 hover:text-gray-300'
+                    }`}
+                  >
+                    {t === 'line' ? '라인' : '봉차트'}
+                  </button>
+                ))}
+              </div>
+            )}
             {filtered.length === 0 ? (
               <div className="h-80 flex items-center justify-center text-gray-600">데이터 없음</div>
+            ) : hasOhlc && chartType === 'candle' ? (
+              <CandlestickChart data={chartData} />
             ) : (
               <LineChart data={chartData} lines={chartLines} />
             )}

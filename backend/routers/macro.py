@@ -35,6 +35,9 @@ def get_macro(
             "symbol": r.symbol,
             "name": r.name,
             "value": r.value,
+            "open":  r.open_price,
+            "high":  r.high_price,
+            "low":   r.low_price,
             "collected_at": r.collected_at.isoformat(),
         }
         for r in rows
@@ -60,6 +63,9 @@ def get_macro_latest(db: Session = Depends(get_db)):
             "symbol": r.symbol,
             "name": r.name,
             "value": r.value,
+            "open":  r.open_price,
+            "high":  r.high_price,
+            "low":   r.low_price,
             "collected_at": r.collected_at.isoformat(),
         }
         for r in rows

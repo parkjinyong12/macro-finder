@@ -39,6 +39,9 @@ class MacroIndicator(Base):
     symbol = Column(String(20), nullable=False, index=True)  # KOSPI, VIX, DXY, US10Y, FEDRATE, KRRATE
     name = Column(String(100), nullable=False)
     value = Column(Float, nullable=False)
+    open_price  = Column(Float, nullable=True)
+    high_price  = Column(Float, nullable=True)
+    low_price   = Column(Float, nullable=True)
     collected_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
