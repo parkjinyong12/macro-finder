@@ -1,8 +1,9 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+from sqlalchemy import func
 
 from database import SessionLocal
 from crawlers.naver_finance import crawl_bond_rates
@@ -85,6 +86,36 @@ JOB_MAP = {
 }
 
 
+_INITIAL_SKIP = {
+    # job_name: (Model, col, 스킵 임계값)
+    # 임계값 내에 최근 데이터가 있으면 초기 실행 생략
+    "bonds":       ("BondRate",        "collected_at", timedelta(hours=1)),
+    "exchange":    ("ExchangeRate",     "collected_at", timedelta(minutes=30)),
+    "commodities": ("Commodity",        "collected_at", timedelta(minutes=30)),
+    "news":        ("TechNews",         "collected_at", timedelta(hours=6)),
+    "macro":       ("MacroIndicator",   "collected_at", timedelta(minutes=30)),
+    "history":     ("BondRate",         "collected_at", timedelta(hours=20)),
+}
+
+
+def _needs_initial_run(job_name: str) -> bool:
+    """DB에 최근 데이터가 없을 때만 True 반환."""
+    if job_name not in _INITIAL_SKIP:
+        return True
+    import models
+    model_name, col_name, threshold = _INITIAL_SKIP[job_name]
+    model = getattr(models, model_name)
+    col = getattr(model, col_name)
+    db = SessionLocal()
+    try:
+        latest = db.query(func.max(col)).scalar()
+    finally:
+        db.close()
+    if latest is None:
+        return True
+    return datetime.utcnow() - latest > threshold
+
+
 def start_scheduler():
     scheduler.add_job(job_bonds, IntervalTrigger(hours=1), id="bonds", replace_existing=True)
     scheduler.add_job(job_exchange, IntervalTrigger(minutes=30), id="exchange", replace_existing=True)
@@ -97,15 +128,20 @@ def start_scheduler():
     scheduler.start()
     logger.info("Scheduler started")
 
-    # 최초 실행을 백그라운드 스레드로 실행해 서버 시작을 블로킹하지 않음
     import threading
     initial_jobs = ["bonds", "exchange", "commodities", "news", "macro", "history"]
+
     def _initial_runs():
         for name in initial_jobs:
+            if not _needs_initial_run(name):
+                logger.info("Initial run skipped (recent data exists): %s", name)
+                continue
             try:
+                logger.info("Initial run started: %s", name)
                 JOB_MAP[name]()
             except Exception as e:
                 logger.error("Initial run %s failed: %s", name, e)
+
     threading.Thread(target=_initial_runs, daemon=True).start()
 
 
