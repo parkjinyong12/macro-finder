@@ -58,12 +58,19 @@ def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]
             "pageNo": str(page),
         })
         url = f"{API_BASE}?{params}"
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"})
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                body = resp.read()
-        except Exception as e:
-            logger.warning("API fetch error %s %s: %s", region_code, deal_ym, e)
+        body = None
+        for attempt in range(3):
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"})
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    body = resp.read()
+                break
+            except Exception as e:
+                wait = 2 ** attempt  # 1s, 2s, 4s
+                logger.warning("API fetch error %s %s (attempt %d): %s — retry in %ds",
+                               region_code, deal_ym, attempt + 1, e, wait)
+                time.sleep(wait)
+        if body is None:
             break
 
         try:
@@ -107,7 +114,7 @@ def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]
         if len(records) + cancelled >= total:
             break
         page += 1
-        time.sleep(0.2)
+        time.sleep(0.5)
 
     return records, cancelled
 
@@ -183,7 +190,7 @@ def crawl_real_estate(db: Session, months: int = 12) -> int:
             logger.info("RealEstate %s %s: avg=%.0f만원, count=%d, 직거래=%.1f%%, 법인=%.1f%%",
                         name, ym, agg["avg_price"], agg["trade_count"],
                         agg.get("direct_deal_ratio", 0), agg.get("corp_buyer_ratio", 0))
-            time.sleep(0.1)
+            time.sleep(0.5)
         db.commit()
 
     logger.info("RealEstate crawl done: %d regions×months inserted", inserted)
