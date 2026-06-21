@@ -24,6 +24,24 @@ def init_db():
     from models import BondRate, ExchangeRate, Commodity, TechNews, MacroIndicator, Prediction, RealEstateStat  # noqa: F401
     Base.metadata.create_all(bind=engine)
     _migrate_ohlc()
+    _migrate_realestate()
+
+
+def _migrate_realestate():
+    """real_estate_stats 테이블에 신규 컬럼 추가 (없을 때만)."""
+    from sqlalchemy import text, inspect
+    insp = inspect(engine)
+    if "real_estate_stats" not in insp.get_table_names():
+        return
+    existing = {c["name"] for c in insp.get_columns("real_estate_stats")}
+    with engine.begin() as conn:
+        for col, typ in [
+            ("direct_deal_ratio", "FLOAT"),
+            ("corp_buyer_ratio", "FLOAT"),
+            ("cancelled_count", "INTEGER"),
+        ]:
+            if col not in existing:
+                conn.execute(text(f"ALTER TABLE real_estate_stats ADD COLUMN {col} {typ}"))
 
 
 def _migrate_ohlc():

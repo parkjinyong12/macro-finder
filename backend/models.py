@@ -68,6 +68,9 @@ class RealEstateStat(Base):
     min_price = Column(Float, nullable=True)
     trade_count = Column(Integer, nullable=False)
     avg_area = Column(Float, nullable=True)                        # 평균 전용면적 (㎡)
+    direct_deal_ratio = Column(Float, nullable=True)               # 직거래 비율 (%)
+    corp_buyer_ratio = Column(Float, nullable=True)                # 법인 매수 비율 (%)
+    cancelled_count = Column(Integer, nullable=True)               # 해제 건수
     collected_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 

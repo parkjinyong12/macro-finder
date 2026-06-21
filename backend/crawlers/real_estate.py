@@ -47,6 +47,7 @@ def _parse_price(raw: str) -> float | None:
 def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]:
     """특정 지역·월의 전체 거래 데이터 반환."""
     records = []
+    cancelled = 0
     page = 1
     while True:
         params = urllib.parse.urlencode({
@@ -82,7 +83,11 @@ def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]
             break
 
         for item in items:
-            # 신규 API: dealAmount / excluUseAr (영문 필드)
+            # 계약 해제 건 제외
+            if item.findtext("cdealType", "").strip():
+                cancelled += 1
+                continue
+
             price_raw = item.findtext("dealAmount", "") or item.findtext("거래금액", "")
             area_raw  = item.findtext("excluUseAr", "") or item.findtext("전용면적", "")
             price = _parse_price(price_raw)
@@ -92,28 +97,38 @@ def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]
                 area = float(area_raw.strip()) if area_raw.strip() else None
             except ValueError:
                 area = None
-            records.append({"price": price, "area": area})
+
+            dealing = item.findtext("dealingGbn", "").strip()   # 중개거래 / 직거래
+            buyer   = item.findtext("buyerGbn", "").strip()     # 개인 / 법인 / 공공기관 / 기타
+            records.append({"price": price, "area": area, "dealing": dealing, "buyer": buyer})
 
         total = int(root.findtext(".//totalCount", "0") or 0)
-        if len(records) >= total:
+        # totalCount는 해제 건 포함이므로 유효 건수 기준으로 비교
+        if len(records) + cancelled >= total:
             break
         page += 1
         time.sleep(0.2)
 
-    return records
+    return records, cancelled
 
 
-def _aggregate(records: list[dict]) -> dict:
+def _aggregate(records: list[dict], cancelled: int = 0) -> dict:
     if not records:
         return {}
     prices = [r["price"] for r in records]
-    areas = [r["area"] for r in records if r["area"] is not None]
+    areas  = [r["area"] for r in records if r["area"] is not None]
+    n = len(records)
+    direct_count = sum(1 for r in records if r.get("dealing") == "직거래")
+    corp_count   = sum(1 for r in records if r.get("buyer") in ("법인", "공공기관"))
     return {
-        "avg_price": sum(prices) / len(prices),
+        "avg_price": sum(prices) / n,
         "max_price": max(prices),
         "min_price": min(prices),
-        "trade_count": len(prices),
+        "trade_count": n,
         "avg_area": sum(areas) / len(areas) if areas else None,
+        "direct_deal_ratio": round(direct_count / n * 100, 1),
+        "corp_buyer_ratio": round(corp_count / n * 100, 1),
+        "cancelled_count": cancelled,
     }
 
 
@@ -145,8 +160,8 @@ def crawl_real_estate(db: Session, months: int = 12) -> int:
         for code, name in REGIONS.items():
             if (code, ym) in existing:
                 continue
-            records = _fetch_month(code, ym, service_key)
-            agg = _aggregate(records)
+            records, cancelled = _fetch_month(code, ym, service_key)
+            agg = _aggregate(records, cancelled)
             if not agg:
                 continue
             db.add(RealEstateStat(
@@ -158,12 +173,16 @@ def crawl_real_estate(db: Session, months: int = 12) -> int:
                 min_price=agg["min_price"],
                 trade_count=agg["trade_count"],
                 avg_area=agg.get("avg_area"),
+                direct_deal_ratio=agg.get("direct_deal_ratio"),
+                corp_buyer_ratio=agg.get("corp_buyer_ratio"),
+                cancelled_count=agg.get("cancelled_count"),
                 collected_at=datetime.utcnow(),
             ))
             existing.add((code, ym))
             inserted += 1
-            logger.info("RealEstate %s %s: avg=%.0f만원, count=%d",
-                        name, ym, agg["avg_price"], agg["trade_count"])
+            logger.info("RealEstate %s %s: avg=%.0f만원, count=%d, 직거래=%.1f%%, 법인=%.1f%%",
+                        name, ym, agg["avg_price"], agg["trade_count"],
+                        agg.get("direct_deal_ratio", 0), agg.get("corp_buyer_ratio", 0))
             time.sleep(0.1)
         db.commit()
 

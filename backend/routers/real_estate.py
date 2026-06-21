@@ -39,6 +39,9 @@ def get_stats(
             "min_price": r.min_price,
             "trade_count": r.trade_count,
             "avg_area": r.avg_area,
+            "direct_deal_ratio": r.direct_deal_ratio,
+            "corp_buyer_ratio": r.corp_buyer_ratio,
+            "cancelled_count": r.cancelled_count,
         }
         for r in rows
     ]
@@ -81,6 +84,9 @@ def get_summary(
                 "max_price": r.max_price,
                 "trade_count": r.trade_count,
                 "avg_area": r.avg_area,
+                "direct_deal_ratio": r.direct_deal_ratio,
+                "corp_buyer_ratio": r.corp_buyer_ratio,
+                "cancelled_count": r.cancelled_count,
             }
             for r in rows
         ],
@@ -109,6 +115,9 @@ def get_trend(
         data[r.deal_ym][r.region_code] = {
             "avg_price": r.avg_price,
             "trade_count": r.trade_count,
+            "direct_deal_ratio": r.direct_deal_ratio,
+            "corp_buyer_ratio": r.corp_buyer_ratio,
+            "cancelled_count": r.cancelled_count,
         }
     return {"codes": code_list, "months": sorted(data.values(), key=lambda x: x["deal_ym"])}
 

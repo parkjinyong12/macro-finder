@@ -301,8 +301,9 @@ export default function RealEstate() {
           {trendData && trendData.months.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
               {selectedCodes.map((code, i) => {
-                const last = [...trendData.months].reverse().find(m => m[code])
-                const prev = last ? [...trendData.months].reverse().slice(1).find(m => m[code]) : null
+                const reversed = [...trendData.months].reverse()
+                const last = reversed.find(m => m[code])
+                const prev = last ? reversed.slice(reversed.indexOf(last) + 1).find(m => m[code]) : null
                 const curr = last?.[code]
                 const prevVal = prev?.[code]
                 const change = curr && prevVal ? ((curr.avg_price - prevVal.avg_price) / prevVal.avg_price * 100) : null
@@ -320,8 +321,14 @@ export default function RealEstate() {
                         {change >= 0 ? '+' : ''}{change.toFixed(1)}%
                       </p>
                     )}
+                    {curr?.direct_deal_ratio != null && (
+                      <div className="mt-1.5 flex gap-2 text-[10px] text-gray-600">
+                        <span>직거래 {curr.direct_deal_ratio.toFixed(1)}%</span>
+                        <span>법인 {curr.corp_buyer_ratio?.toFixed(1)}%</span>
+                      </div>
+                    )}
                     {last && (
-                      <p className="text-[10px] text-gray-600 mt-1">{fmtYm(last.deal_ym)} 기준</p>
+                      <p className="text-[10px] text-gray-600 mt-0.5">{fmtYm(last.deal_ym)} 기준</p>
                     )}
                   </div>
                 )
@@ -402,7 +409,8 @@ function SummaryTab({ summary }) {
                 <th className="text-left pb-2 pr-3">지역</th>
                 <th className="text-right pb-2 pr-3">평균 거래가</th>
                 <th className="text-right pb-2 pr-3 hidden sm:table-cell">최고가</th>
-                <th className="text-right pb-2 pr-3 hidden sm:table-cell">최저가</th>
+                <th className="text-right pb-2 pr-3 hidden md:table-cell">직거래</th>
+                <th className="text-right pb-2 pr-3 hidden md:table-cell">법인매수</th>
                 <th className="text-right pb-2 hidden sm:table-cell">거래량</th>
               </tr>
             </thead>
@@ -419,8 +427,11 @@ function SummaryTab({ summary }) {
                   <td className="py-2 pr-3 text-right font-mono text-gray-400 hidden sm:table-cell">
                     {fmtPrice(r.max_price)}
                   </td>
-                  <td className="py-2 pr-3 text-right font-mono text-gray-500 hidden sm:table-cell">
-                    {fmtPrice(r.min_price)}
+                  <td className="py-2 pr-3 text-right text-gray-400 hidden md:table-cell">
+                    {r.direct_deal_ratio != null ? `${r.direct_deal_ratio.toFixed(1)}%` : '—'}
+                  </td>
+                  <td className="py-2 pr-3 text-right text-gray-400 hidden md:table-cell">
+                    {r.corp_buyer_ratio != null ? `${r.corp_buyer_ratio.toFixed(1)}%` : '—'}
                   </td>
                   <td className="py-2 text-right text-gray-400 hidden sm:table-cell">
                     {r.trade_count}건
