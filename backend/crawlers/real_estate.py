@@ -15,7 +15,7 @@ from models import RealEstateStat
 
 logger = logging.getLogger(__name__)
 
-API_BASE = "https://apis.data.go.kr/1611000/AptTradeSvc/getRTMSDataSvcAptTrade"
+API_BASE = "https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev"
 
 # 수집 대상 지역 (법정동 코드 앞 5자리 → 지역명)
 REGIONS = {
@@ -58,7 +58,7 @@ def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]
         })
         url = f"{API_BASE}?{params}"
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"})
             with urllib.request.urlopen(req, timeout=15) as resp:
                 body = resp.read()
         except Exception as e:
@@ -72,7 +72,7 @@ def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]
             break
 
         result_code = root.findtext(".//resultCode", "")
-        if result_code != "00":
+        if result_code not in ("00", "000"):
             result_msg = root.findtext(".//resultMsg", "")
             logger.warning("API error %s %s: %s %s", region_code, deal_ym, result_code, result_msg)
             break
@@ -82,8 +82,9 @@ def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]
             break
 
         for item in items:
-            price_raw = item.findtext("거래금액", "")
-            area_raw = item.findtext("전용면적", "")
+            # 신규 API: dealAmount / excluUseAr (영문 필드)
+            price_raw = item.findtext("dealAmount", "") or item.findtext("거래금액", "")
+            area_raw  = item.findtext("excluUseAr", "") or item.findtext("전용면적", "")
             price = _parse_price(price_raw)
             if price is None:
                 continue
