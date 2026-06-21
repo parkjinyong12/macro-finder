@@ -49,3 +49,18 @@ export const fetchSchedulerStatus = () =>
 
 export const runJob = (jobName) =>
   api.post(`/scheduler/run/${jobName}`).then(r => r.data)
+
+export const fetchRealEstateStats = (params = {}) =>
+  api.get('/realestate/stats', { params }).then(r => r.data)
+
+export const fetchRealEstateRegions = () =>
+  api.get('/realestate/regions').then(r => r.data)
+
+export const fetchRealEstateSummary = (deal_ym = null) =>
+  api.get('/realestate/summary', { params: deal_ym ? { deal_ym } : {} }).then(r => r.data)
+
+export const fetchRealEstateTrend = (codes, months = 12) =>
+  api.get('/realestate/trend', { params: { codes: codes.join(','), months } }).then(r => r.data)
+
+export const triggerRealEstateCrawl = () =>
+  api.post('/realestate/crawl').then(r => r.data)

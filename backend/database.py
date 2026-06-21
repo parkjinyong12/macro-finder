@@ -21,7 +21,7 @@ def get_db():
 
 
 def init_db():
-    from models import BondRate, ExchangeRate, Commodity, TechNews, MacroIndicator, Prediction  # noqa: F401
+    from models import BondRate, ExchangeRate, Commodity, TechNews, MacroIndicator, Prediction, RealEstateStat  # noqa: F401
     Base.metadata.create_all(bind=engine)
     _migrate_ohlc()
 

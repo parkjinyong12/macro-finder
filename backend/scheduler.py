@@ -12,6 +12,7 @@ from crawlers.tech_news import crawl_tech_news
 from crawlers.historical import crawl_all_history
 from crawlers.macro_indicators import crawl_macro_latest, crawl_all_macro
 from crawlers.predictor import run_prediction
+from crawlers.real_estate import crawl_real_estate
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ job_last_run: dict[str, datetime | None] = {
     "history": None,
     "macro": None,
     "predictions": None,
+    "realestate": None,
 }
 
 
@@ -67,6 +69,10 @@ def job_predictions():
     _run_with_session("predictions", run_prediction)
 
 
+def job_realestate():
+    _run_with_session("realestate", lambda db: crawl_real_estate(db, months=2))
+
+
 JOB_MAP = {
     "bonds": job_bonds,
     "exchange": job_exchange,
@@ -75,6 +81,7 @@ JOB_MAP = {
     "history": job_history,
     "macro": job_macro,
     "predictions": job_predictions,
+    "realestate": job_realestate,
 }
 
 
@@ -86,6 +93,7 @@ def start_scheduler():
     scheduler.add_job(job_macro, IntervalTrigger(minutes=30), id="macro", replace_existing=True)
     scheduler.add_job(job_history, IntervalTrigger(hours=24), id="history", replace_existing=True)
     scheduler.add_job(job_predictions, IntervalTrigger(hours=6), id="predictions", replace_existing=True)
+    scheduler.add_job(job_realestate, IntervalTrigger(hours=24), id="realestate", replace_existing=True)
     scheduler.start()
     logger.info("Scheduler started")
 

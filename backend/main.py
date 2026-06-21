@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 
 from database import init_db
 from scheduler import start_scheduler, stop_scheduler
-from routers import bonds, exchange, commodities, news, scheduler_ctrl, macro, predictions, yield_curve
+from routers import bonds, exchange, commodities, news, scheduler_ctrl, macro, predictions, yield_curve, real_estate
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,6 +36,7 @@ app.include_router(macro.router)
 app.include_router(predictions.router)
 app.include_router(yield_curve.router)
 app.include_router(scheduler_ctrl.router)
+app.include_router(real_estate.router)
 
 
 @app.on_event("startup")

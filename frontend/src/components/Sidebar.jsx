@@ -8,6 +8,7 @@ const NAV = [
   { to: '/macro',       label: '주요 지표',   short: '지표',  icon: '🌐' },
   { to: '/predictions', label: '방향 예측',   short: '예측',  icon: '🤖' },
   { to: '/tech',        label: '기술 트렌드', short: '트렌드', icon: '🔬' },
+  { to: '/realestate',  label: '부동산 시세', short: '부동산', icon: '🏠' },
 ]
 
 export function BottomNav() {

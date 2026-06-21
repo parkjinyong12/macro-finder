@@ -56,6 +56,21 @@ class Prediction(Base):
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
+class RealEstateStat(Base):
+    __tablename__ = "real_estate_stats"
+
+    id = Column(Integer, primary_key=True, index=True)
+    region_code = Column(String(10), nullable=False, index=True)  # 법정동 앞 5자리
+    region_name = Column(String(50), nullable=False)
+    deal_ym = Column(String(6), nullable=False, index=True)        # '202505'
+    avg_price = Column(Float, nullable=False)                      # 평균 거래가 (만원)
+    max_price = Column(Float, nullable=True)
+    min_price = Column(Float, nullable=True)
+    trade_count = Column(Integer, nullable=False)
+    avg_area = Column(Float, nullable=True)                        # 평균 전용면적 (㎡)
+    collected_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
 class TechNews(Base):
     __tablename__ = "tech_news"
 

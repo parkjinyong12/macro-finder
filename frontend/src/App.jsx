@@ -7,6 +7,7 @@ import Commodities from './pages/Commodities'
 import MacroIndicators from './pages/MacroIndicators'
 import Predictions from './pages/Predictions'
 import TechTrends from './pages/TechTrends'
+import RealEstate from './pages/RealEstate'
 import { FilterProvider } from './context/FilterContext'
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
                 <Route path="/macro" element={<MacroIndicators />} />
                 <Route path="/predictions" element={<Predictions />} />
                 <Route path="/tech" element={<TechTrends />} />
+                <Route path="/realestate" element={<RealEstate />} />
               </Routes>
             </div>
           </main>
