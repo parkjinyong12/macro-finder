@@ -191,12 +191,7 @@ def crawl_real_estate(db: Session, months: int = 12) -> int:
             logger.info("RealEstate %s %s: avg=%.0f만원, count=%d, 직거래=%.1f%%, 법인=%.1f%%",
                         name, ym, agg["avg_price"], agg["trade_count"],
                         agg.get("direct_deal_ratio", 0), agg.get("corp_buyer_ratio", 0))
-            # 10건마다 30초 휴식 (버스트 차단 방지)
-            if inserted % 10 == 0:
-                logger.info("Rate limit pause (10 calls)...")
-                time.sleep(30)
-            else:
-                time.sleep(1)
+            time.sleep(0.5)
         db.commit()
 
     logger.info("RealEstate crawl done: %d regions×months inserted", inserted)
