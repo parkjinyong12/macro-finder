@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, UniqueConstraint
 from database import Base
 
 
@@ -72,6 +72,10 @@ class RealEstateStat(Base):
     corp_buyer_ratio = Column(Float, nullable=True)                # 법인 매수 비율 (%)
     cancelled_count = Column(Integer, nullable=True)               # 해제 건수
     collected_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    __table_args__ = (
+        UniqueConstraint("region_code", "deal_ym", name="uq_realestate_region_ym"),
+    )
 
 
 class TechNews(Base):
