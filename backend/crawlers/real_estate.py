@@ -50,14 +50,14 @@ def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]
     cancelled = 0
     page = 1
     while True:
-        params = urllib.parse.urlencode({
-            "serviceKey": service_key,
+        # serviceKey는 이미 인코딩된 키를 그대로 삽입 (urlencode 시 이중 인코딩 방지)
+        other = urllib.parse.urlencode({
             "LAWD_CD": region_code,
             "DEAL_YMD": deal_ym,
             "numOfRows": "1000",
             "pageNo": str(page),
         })
-        url = f"{API_BASE}?{params}"
+        url = f"{API_BASE}?serviceKey={service_key}&{other}"
         body = None
         for attempt in range(4):
             try:
