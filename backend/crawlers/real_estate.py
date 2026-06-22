@@ -59,14 +59,15 @@ def _fetch_month(region_code: str, deal_ym: str, service_key: str) -> list[dict]
         })
         url = f"{API_BASE}?{params}"
         body = None
-        for attempt in range(3):
+        for attempt in range(4):
             try:
                 req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"})
                 with urllib.request.urlopen(req, timeout=15) as resp:
                     body = resp.read()
                 break
             except Exception as e:
-                wait = 2 ** attempt  # 1s, 2s, 4s
+                # 401은 버스트 차단 — 오래 기다려야 풀림
+                wait = 30 if "401" in str(e) else 2 ** attempt
                 logger.warning("API fetch error %s %s (attempt %d): %s — retry in %ds",
                                region_code, deal_ym, attempt + 1, e, wait)
                 time.sleep(wait)
@@ -190,7 +191,12 @@ def crawl_real_estate(db: Session, months: int = 12) -> int:
             logger.info("RealEstate %s %s: avg=%.0f만원, count=%d, 직거래=%.1f%%, 법인=%.1f%%",
                         name, ym, agg["avg_price"], agg["trade_count"],
                         agg.get("direct_deal_ratio", 0), agg.get("corp_buyer_ratio", 0))
-            time.sleep(0.5)
+            # 10건마다 30초 휴식 (버스트 차단 방지)
+            if inserted % 10 == 0:
+                logger.info("Rate limit pause (10 calls)...")
+                time.sleep(30)
+            else:
+                time.sleep(1)
         db.commit()
 
     logger.info("RealEstate crawl done: %d regions×months inserted", inserted)
